@@ -16,6 +16,7 @@
         <TextBox x:Name="textBox_Feedback" Margin="10,70,10,35" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
         <Button x:Name="button_StartStop" Content="Start" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="75" Click="button_StartStop_Click"/>
         <Button x:Name="button_Hide" Content="Hide" HorizontalAlignment="Right" Margin="0,0,90,10" VerticalAlignment="Bottom" Width="75" Click="button_Hide_Click"/>
+        <Button x:Name="button_verify" Content="Verify" HorizontalAlignment="Right" Margin="0,0,170,10" VerticalAlignment="Bottom" Width="75" Click="button_verify_Click"/>
 
     </Grid>
 </Window>

@@ -1,2 +1,2 @@
-Z:\Conrad\Design\Programming\C#\Transposer C#\TransposerCSharp\Transposer_WPF\bin\Debug\Songs
-W:\transposer
+Z:\Conrad\Entertainment\Bin\media
+Y:\video-bin\sync\media

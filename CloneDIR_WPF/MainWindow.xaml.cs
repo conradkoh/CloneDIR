@@ -34,6 +34,7 @@ namespace CloneDIR_WPF
 
         private bool force_cancel = false;
 
+        private int _verify_count = 0;
         string FILENAME_CONFIG = "config.txt";
         public MainWindow()
         {
@@ -69,6 +70,10 @@ namespace CloneDIR_WPF
         private void button_Source_Explore_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            if (Directory.Exists(this._source))
+            {
+                dialog.SelectedPath = this._source;
+            }
             System.Windows.Forms.DialogResult result = dialog.ShowDialog();
             if(result == System.Windows.Forms.DialogResult.OK)
             {
@@ -81,6 +86,10 @@ namespace CloneDIR_WPF
         private void button_Destination_Explore_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            if (Directory.Exists(this._destination))
+            {
+                dialog.SelectedPath = this._destination;
+            }
             System.Windows.Forms.DialogResult result = dialog.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
@@ -511,5 +520,61 @@ namespace CloneDIR_WPF
             
         }
 
+        private void button_verify_Click(object sender, RoutedEventArgs e)
+        {
+
+            System.Threading.Thread thread = new System.Threading.Thread(() => {
+
+                Feedback_WriteLine(String.Format("Verifying source and destinations."));
+                VerifyDirectoryFiles(this._source, this._destination, true);
+                Feedback_WriteLine(String.Format("Verification complete."));
+            });
+            thread.Start();
+            
+        }
+
+        private void VerifyDirectoryFiles(string source, string target, bool update = false)
+        {
+            if(Flags.exit != true)
+            {
+                string[] subdirectories_source = Directory.GetDirectories(source);
+                string[] subdirectories_target = Directory.GetDirectories(target);
+                string[] files_source = Directory.GetFiles(source);
+                //Check directories
+                foreach (string subdirectory_source in subdirectories_source)
+                {
+                    string relative_path = subdirectory_source.Substring(source.Length);
+                    string subdirectory_target = System.IO.Path.Combine(target, relative_path.Trim( new char[] {'\\','/' }));
+                    VerifyDirectoryFiles(subdirectory_source, subdirectory_target);
+                }
+
+                //Check files
+                foreach (string file_source in files_source)
+                {
+                    string relative_path = file_source.Substring(source.Length);
+                    string file_target = System.IO.Path.Combine(target, relative_path.Trim(new char[] { '\\', '/' }));
+                    //VERIFY the hashes of the files, if they both exist
+                    if (File.Exists(file_source) && File.Exists(file_target))
+                    {
+                        //start verification
+                        using (var md5 = System.Security.Cryptography.MD5.Create())
+                        {
+                            Feedback_WriteLine(String.Format("Verifying: {0}", relative_path));
+                            var hash_source = md5.ComputeHash(File.OpenRead(file_source));
+                            var hash_target = md5.ComputeHash(File.OpenRead(file_target));
+                            if (hash_source != hash_target)
+                            {
+                                //copy the file to the target again
+                                Feedback_WriteLine(String.Format("Modified file: {0}", file_source));
+                                if(update == true)
+                                {
+                                    CopyFileWhenReadyBackground(file_source, file_target);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
