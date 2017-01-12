@@ -1,0 +1,13 @@
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\bin\Release\CloneDIR_WPF.exe.config
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\bin\Release\CloneDIR_WPF.exe
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\bin\Release\CloneDIR_WPF.pdb
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Release\MainWindow.g.cs
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Release\App.g.cs
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Release\CloneDIR_WPF_MarkupCompile.cache
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Release\CloneDIR_WPF_MarkupCompile.lref
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Release\MainWindow.baml
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Release\CloneDIR_WPF.g.resources
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Release\CloneDIR_WPF.Properties.Resources.resources
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Release\CloneDIR_WPF.csproj.GenerateResource.Cache
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Release\CloneDIR_WPF.exe
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Release\CloneDIR_WPF.pdb

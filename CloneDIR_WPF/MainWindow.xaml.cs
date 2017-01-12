@@ -25,17 +25,28 @@ namespace CloneDIR_WPF
             public static bool exit;
         }
 
+        //Constants
+        private int _verify_count = 0;
+        private const int TIMER_DELAY = 5000; //Timer delay in ms
+        string FILENAME_CONFIG = "config.txt";
+        const string LABEL_BUTTON_START = "Start";
+        const string LABEL_BUTTON_STOP = "Stop";
+
+
+        //Instance variables
         private string _source = "";
         private string _destination = "";
+
         private FileSystemWatcher _watcher;
         NotifyIcon _notifyIcon;
+        System.Timers.Timer _timer;
+
+        //State variables
         private STATUS _runStatus = STATUS.STOPPED;
         public enum STATUS { STARTED, STOPPED};
-
         private bool force_cancel = false;
+        private bool backoff = false;
 
-        private int _verify_count = 0;
-        string FILENAME_CONFIG = "config.txt";
         public MainWindow()
         {
             InitializeComponent();
@@ -46,8 +57,9 @@ namespace CloneDIR_WPF
         {
             if (File.Exists(FILENAME_CONFIG))
             {
-                StreamReader sr = new StreamReader(FILENAME_CONFIG);
-                _source = sr.ReadLine();
+                //Restore previous state
+                StreamReader sr = new StreamReader(FILENAME_CONFIG); 
+                _source = sr.ReadLine(); 
                 textBox_Source.Text = _source;
                 _destination = sr.ReadLine();
                 textBox_Destination.Text = _destination;
@@ -101,38 +113,13 @@ namespace CloneDIR_WPF
 
         private void button_StartStop_Click(object sender, RoutedEventArgs e)
         {
-            string LABEL_BUTTON_START = "Start";
-            string LABEL_BUTTON_STOP = "Stop";
             if(_runStatus == STATUS.STARTED)
             {
-                bool success = StopFileWatchers(_source);
-                if (success)
-                {
-                    Feedback_WriteLine("File watchers stopped");
-                    _runStatus = STATUS.STOPPED;
-                    force_cancel = true;
-                    button_StartStop.Content = LABEL_BUTTON_START;
-                }
-                else
-                {
-                    Feedback_WriteLine("File watchers failed to be stopped");
-                }
+                this.SetState(STATUS.STOPPED);
             }
             else if(_runStatus == STATUS.STOPPED)
             {
-                bool success = StartFileWatchers(_source);
-                if (success)
-                {
-                    Feedback_WriteLine("File watchers started.");
-                    _runStatus = STATUS.STARTED;
-                    force_cancel = false;
-                    HandleDirectoryDiffsBackground(_source, _destination);
-                    button_StartStop.Content = LABEL_BUTTON_STOP;
-                }
-                else
-                {
-                    Feedback_WriteLine("File watchers failed to be started");
-                }
+                this.SetState(STATUS.STARTED);
             }
             else
             {
@@ -142,6 +129,75 @@ namespace CloneDIR_WPF
                 force_cancel = false;
                 button_StartStop.Content = LABEL_BUTTON_STOP;
             }
+        }
+
+        private void SetState(STATUS newState)
+        {
+            if(newState == STATUS.STARTED)
+            {
+                StartTimedSync();
+                bool success = StartFileWatchers(_source);
+                if (success)
+                {
+                    Feedback_WriteLine("File watchers started.");
+                    _runStatus = STATUS.STARTED;
+                    force_cancel = false;
+                    HandleDirectoryDiffsBackground(_source, _destination);
+
+                    //UI Elements must be started on the main thread
+                    Dispatcher.Invoke(new Action(() => {
+                        button_StartStop.Content = LABEL_BUTTON_STOP;
+                    }));
+                    
+                }
+                else
+                {
+                    Feedback_WriteLine("File watchers failed to be started");
+                }
+            }
+            else if(newState == STATUS.STOPPED)
+            {
+                this.StopTimedSync();
+                bool success = StopFileWatchers(_source);
+                if (success)
+                {
+                    Feedback_WriteLine("File watchers stopped");
+                    _runStatus = STATUS.STOPPED;
+                    force_cancel = true;
+
+                    //UI Elements must be started on the main thread
+                    Dispatcher.Invoke(new Action(() => {
+                        button_StartStop.Content = LABEL_BUTTON_START;
+                    }));
+                }
+                else
+                {
+                    Feedback_WriteLine("File watchers failed to be stopped");
+                }
+            }
+            else
+            {
+                Feedback_WriteLine(String.Format("Invalid state: {0}", newState));
+            }
+
+        }
+
+        private void StartTimedSync()
+        {
+            this._timer = new System.Timers.Timer();
+            this._timer.Interval = TIMER_DELAY;
+            this._timer.Elapsed += Sync;
+            this._timer.Start();
+            Feedback_WriteLine(String.Format("Timed sync started with duration: {0} s", TIMER_DELAY / 1000f));
+        }
+        private void StopTimedSync()
+        {
+            this._timer.Stop();
+            Feedback_WriteLine(String.Format("Timed sync stopped"));
+        }
+        private void Sync(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            HandleDirectoryDiffsBackground(_source, _destination);
         }
         //===================================================
         //UI
@@ -233,6 +289,14 @@ namespace CloneDIR_WPF
         
         private void WatchedDirectoryChanged(object sender, FileSystemEventArgs args)
         {
+            if(this.backoff == false)
+            {
+                HandleWatchedDirectories(sender, args);
+            }
+        }
+
+        private void HandleWatchedDirectories(object sender, FileSystemEventArgs args)
+        {
             Feedback_WriteLine("==========================================");
             string filePath = args.FullPath;
             string relativePath = filePath.Substring(_source.Length);
@@ -311,43 +375,37 @@ namespace CloneDIR_WPF
 
         private void CopyFileWhenReady(string source, string destination)
         {
-            FileInfo file_source = new FileInfo(source);
-            int count = 0;
-            while (IsFileLocked(file_source) && count < 100)
-            {
-                System.Threading.Thread.Sleep(1000);
-            }
-            //check if destination to copy to exists, and create if it doesn't
-            if(count >= 100)
-            {
-                //issues with copying
+            //Everything ok
+            string target_dir = System.IO.Path.GetDirectoryName(destination);
 
-            }
-            else
+            //check if destination to copy to exists, and create if it doesn't
+            if (!Directory.Exists(target_dir))
             {
-                //Everything ok
-                string target_dir = System.IO.Path.GetDirectoryName(destination);
-                if (!Directory.Exists(target_dir))
+                try
                 {
                     Directory.CreateDirectory(target_dir);
                 }
-                bool copied = false;
-                while (!copied)
+                catch
                 {
-                    try
-                    {
-                        File.Copy(source, destination, true);
-                        copied = true;
-                        Feedback_WriteLine(String.Format("File copied: \n       {0}\n       {1}\n", source, destination));
-                    }
-                    catch
-                    {
-                    }
-
+                    this.SetState(STATUS.STOPPED);
+                    Feedback_WriteLine("Unable to create destination folder. Stopping.");
                 }
             }
-            
-            
+            FileInfo fileinfo = new FileInfo(source);
+            if (IsFileLocked(fileinfo))
+            {
+                //If file is locked don't bother
+                this.backoff = true;
+                System.Threading.Thread.Sleep(5000);
+                this.backoff = false;
+                Feedback_WriteLine(String.Format("File locked: {0}, backing off\n", source));
+            }
+            else
+            {
+                //If not backing off, and file is not locked, copy
+                File.Copy(source, destination, true);
+                Feedback_WriteLine(String.Format("File copied: \n       {0}\n       {1}\n", source, destination));
+            }
         }
         protected virtual bool IsFileLocked(FileInfo file)
         {
@@ -392,7 +450,15 @@ namespace CloneDIR_WPF
                 //Feedback_WriteLine(String.Format("Handling directory diffs: \n       {0}\n       {1}\n", source, target));
                 if (!Directory.Exists(target))
                 {
-                    Directory.CreateDirectory(target);
+                    try
+                    {
+                        Directory.CreateDirectory(target);
+                    }
+                    catch
+                    {
+                        this.SetState(STATUS.STOPPED);
+                        Feedback_WriteLine("Unable to create destination folder. Stopping.");
+                    }
                 }
                 if (Directory.Exists(source) && Directory.Exists(target))
                 {
@@ -511,8 +577,16 @@ namespace CloneDIR_WPF
                         string target_filepath = System.IO.Path.Combine(target, relative_path);
                         if (File.Exists(target_filepath))
                         {
-                            File.Delete(target_filepath);
-                            Feedback_WriteLine(String.Format("Removing file: {0}", target_filepath));
+                            try
+                            {
+                                File.Delete(target_filepath);
+                                Feedback_WriteLine(String.Format("Removing file: {0}", target_filepath));
+                            }
+                            catch
+                            {
+                                Feedback_WriteLine(String.Format("Failed to delete file at destination: {0}", target_filepath));
+                            }
+                            
                         }
                     }
                 }
@@ -575,6 +649,11 @@ namespace CloneDIR_WPF
                     }
                 }
             }
+        }
+
+        private void button_Clear_Click(object sender, RoutedEventArgs e)
+        {
+            textBox_Feedback.Text = "";
         }
     }
 }

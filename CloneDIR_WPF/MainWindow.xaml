@@ -17,6 +17,7 @@
         <Button x:Name="button_StartStop" Content="Start" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="75" Click="button_StartStop_Click"/>
         <Button x:Name="button_Hide" Content="Hide" HorizontalAlignment="Right" Margin="0,0,90,10" VerticalAlignment="Bottom" Width="75" Click="button_Hide_Click"/>
         <Button x:Name="button_verify" Content="Verify" HorizontalAlignment="Right" Margin="0,0,170,10" VerticalAlignment="Bottom" Width="75" Click="button_verify_Click"/>
+        <Button x:Name="button_Clear" Content="Clear" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="75" Click="button_Clear_Click"/>
 
     </Grid>
 </Window>

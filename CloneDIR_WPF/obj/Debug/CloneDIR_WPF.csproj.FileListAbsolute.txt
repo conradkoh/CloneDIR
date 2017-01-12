@@ -1,7 +1,6 @@
 Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\bin\Debug\CloneDIR_WPF.exe.config
 Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\bin\Debug\CloneDIR_WPF.exe
 Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\bin\Debug\CloneDIR_WPF.pdb
-Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Debug\CloneDIR_WPF.csprojResolveAssemblyReference.cache
 Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Debug\MainWindow.g.cs
 Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Debug\App.g.cs
 Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Debug\CloneDIR_WPF_MarkupCompile.cache
@@ -12,3 +11,4 @@ Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Debug\CloneDIR_WPF
 Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Debug\CloneDIR_WPF.csproj.GenerateResource.Cache
 Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Debug\CloneDIR_WPF.exe
 Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Debug\CloneDIR_WPF.pdb
+Z:\Conrad\Design\Programming\C#\CloneDIR_WPF\CloneDIR_WPF\obj\Debug\CloneDIR_WPF.csprojResolveAssemblyReference.cache
